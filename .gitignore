@@ -1,0 +1,20 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+
+# Environments
+.venv/
+venv/
+# VSCode
+.vscode/
+
+# Faiss Index
+.faiss_index/
+
+# Data or logs
+*.log
+*.csv
+*.pkl
+*.zip
+*.exe
+*.mp4
