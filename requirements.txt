@@ -1,8 +1,10 @@
-streamlit
+fastapi
+uvicorn[standard]
+requests
+pydantic
 PyPDF2
 langchain
-faiss-cpu
+langchain-community
 sentence-transformers
-transformers
+google-generativeai
 torch
-google.generativeai
