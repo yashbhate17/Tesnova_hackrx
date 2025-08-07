@@ -123,10 +123,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Root route (for health check)
 @app.get("/")
-def root():
-    return {"status": "ok", "message": "API is running"}
+def read_root():
+    return {"message": "Hello from Tesnova"}
+
+@app.post("/api/v1/hackrx/run")
+async def hackrx_run():
+    return {"message": "HackRX endpoint is working"}
 
 # Include router
 app.include_router(router)
