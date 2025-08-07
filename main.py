@@ -13,11 +13,13 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 import google.generativeai as genai
 
+# Constants
 TEAM_TOKEN = "f37d7d844f3b77d9dd8e9eb5f95d52fde0ed2fc637e62fdf71ce89eced47df37"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
+# Pydantic Models
 class RunRequest(BaseModel):
     documents: str = Field(..., description="URL to the PDF document")
     questions: List[str] = Field(..., description="List of questions")
@@ -25,8 +27,10 @@ class RunRequest(BaseModel):
 class RunResponse(BaseModel):
     answers: List[str]
 
+# Create API Router
 router = APIRouter(prefix="/api/v1")
 
+# Utility Functions
 def download_pdf(url):
     try:
         r = requests.get(url)
@@ -66,8 +70,8 @@ def create_vector_store(chunks):
 
 def ask_gemini(context, question):
     prompt = f"""
-Answer the question as detailed as possible from the provided context, make sure to provide all the details,
-if the answer is not in provided context just say, "answer is not available in the context", don't provide the wrong answer.
+Answer the question as detailed as possible from the provided context, make sure to provide all the details.
+If the answer is not in provided context, just say, "answer is not available in the context". Don't provide the wrong answer.
 
 Context:
 {context}
@@ -81,6 +85,7 @@ Answer:
     response = model.generate_content(prompt)
     return response.text.strip() if hasattr(response, "text") else str(response)
 
+# Main Endpoint
 @router.post("/hackrx/run", response_model=RunResponse)
 async def hackrx_run(
     request: Request,
@@ -99,7 +104,7 @@ async def hackrx_run(
     text_chunks = get_text_chunks(pdf_text)
     vector_store, embeddings = create_vector_store(text_chunks)
 
-    # For each question, retrieve top-4 similar context and pass to Gemini
+    # Get answers
     answers = []
     for q in payload.questions:
         docs = vector_store.similarity_search(q, k=4)
@@ -112,8 +117,16 @@ async def hackrx_run(
 
     return RunResponse(answers=answers)
 
+# FastAPI App
 app = FastAPI(
     title="Retrieval System API",
     version="1.0.0"
 )
+
+# Root route (for health check)
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "API is running"}
+
+# Include router
 app.include_router(router)
